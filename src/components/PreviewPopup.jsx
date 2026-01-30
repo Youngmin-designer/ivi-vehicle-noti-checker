@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { measureLines, onFontsReady } from '../utils/measureLines';
 import { LEVEL_STYLES, FONT_LIST } from '../constants';
+import { getIconUrl } from '../utils/icon';
 import html2canvas from 'html2canvas';
 
 // 기본 피그마 스펙 상수
@@ -31,7 +32,6 @@ const LANGUAGES = {
 // 텍스트에서 \n을 줄바꿈으로 변환
 const renderTextWithLineBreaks = (text) => {
   if (!text) return null;
-  // 실제 줄바꿈(\n)과 문자열로 입력된 \n 모두 처리
   const processedText = text.replace(/\\n/g, '\n');
   return processedText.split('\n').map((line, index, array) => (
     <span key={index}>
@@ -60,7 +60,17 @@ const DEFAULT_LEVEL_STYLE = {
 };
 
 // 개별 프리뷰 카드 컴포넌트
-function PreviewCard({ font, language, selectedIcon, selectedLevel, title, description, includeImage, onLineCountChange, errorReasons = [] }) {
+function PreviewCard({
+  font,
+  language,
+  selectedIcon,
+  selectedLevel,
+  title,
+  description,
+  includeImage,
+  onLineCountChange,
+  errorReasons = [],
+}) {
   const titleRef = useRef(null);
   const descRef = useRef(null);
   const [titleLines, setTitleLines] = useState(0);
@@ -71,7 +81,7 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
   const isVertical = levelStyle.layout === 'vertical';
 
   const criticalDescSpec = levelStyle.description || {};
-  
+
   // title과 description 중 하나만 있는지 확인 (horizontal 레이아웃에서만)
   const hasTitle = levelStyle.hasTitle && title && title.trim();
   const hasDesc = description && description.trim();
@@ -105,7 +115,15 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
   // 줄 수 초과 여부를 상위로 전달
   useEffect(() => {
     if (onLineCountChange) {
-      onLineCountChange(font.id, language.id, isOverLimit, totalLines, maxLines, titleLines, descLines);
+      onLineCountChange(
+        font.id,
+        language.id,
+        isOverLimit,
+        totalLines,
+        maxLines,
+        titleLines,
+        descLines
+      );
     }
   }, [isOverLimit, font.id, language.id, onLineCountChange, totalLines, maxLines, titleLines, descLines]);
 
@@ -114,10 +132,7 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
   const cornerRadius = isAsteonTheme ? 32 : levelStyle.borderRadius;
 
   // 이미지 포함 시 텍스트 영역 너비 조정 (horizontal 레이아웃에서만)
-  // 이미지가 있을 때: 510 - 24(좌패딩) - 48(아이콘) - 24(갭) - 24(갭) - 120(이미지) = 270
-  const textAreaWidth = !isVertical && includeImage 
-    ? 270
-    : levelStyle.textAreaWidth;
+  const textAreaWidth = !isVertical && includeImage ? 270 : levelStyle.textAreaWidth;
 
   // 이미지가 있을 때 오른쪽 패딩을 0으로 (이미지가 오른쪽 끝까지)
   const rightPadding = !isVertical && includeImage ? 0 : levelStyle.padding.right;
@@ -138,17 +153,15 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
     backgroundColor: levelStyle.background,
     borderRadius: cornerRadius,
     boxSizing: 'border-box',
-    overflow: 'hidden', // 이미지가 radius 밖으로 나가지 않도록
-    // 이미지가 없을 때만 border 직접 적용, 있을 때는 ::after로 오버레이
-    border: (!includeImage && borderColor) ? `2px solid ${borderColor}` : 'none',
+    overflow: 'hidden',
+    border: !includeImage && borderColor ? `2px solid ${borderColor}` : 'none',
   };
 
-  const iconFilter = levelStyle.iconColor === '#ffffff' 
-    ? 'brightness(0) invert(1)' 
-    : 'none';
+  const iconFilter =
+    levelStyle.iconColor === '#ffffff' ? 'brightness(0) invert(1)' : 'none';
 
   return (
-    <div 
+    <div
       className="preview-card-scale-wrapper"
       style={{
         width: BASE_SPECS.popupWidth * PREVIEW_SCALE,
@@ -157,7 +170,9 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
       }}
     >
       <div
-        className={`popup-card ${isVertical ? 'vertical' : 'horizontal'} ${isSingleText ? 'single-text' : ''} ${includeImage && borderColor ? 'with-image-border' : ''}`}
+        className={`popup-card ${isVertical ? 'vertical' : 'horizontal'} ${
+          isSingleText ? 'single-text' : ''
+        } ${includeImage && borderColor ? 'with-image-border' : ''}`}
         style={{
           ...popupStyle,
           transform: `scale(${PREVIEW_SCALE})`,
@@ -165,130 +180,144 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
           '--popup-border-color': borderColor || 'transparent',
         }}
       >
-      <div
-        className="popup-icon"
-        style={{
-          width: levelStyle.iconSize,
-          height: levelStyle.iconSize,
-          minWidth: levelStyle.iconSize,
-          marginBottom: isVertical ? levelStyle.iconTextGap : 0,
-          marginRight: isVertical ? 0 : levelStyle.iconTextGap,
-        }}
-      >
-        {selectedIcon ? (
-import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
+        <div
+          className="popup-icon"
+          style={{
+            width: levelStyle.iconSize,
+            height: levelStyle.iconSize,
+            minWidth: levelStyle.iconSize,
+            marginBottom: isVertical ? levelStyle.iconTextGap : 0,
+            marginRight: isVertical ? 0 : levelStyle.iconTextGap,
+          }}
+        >
+          {selectedIcon ? (
+            <img
+              src={getIconUrl(selectedIcon)}
+              alt={selectedIcon}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                filter: iconFilter,
+              }}
+              loading="lazy"
+            />
+          ) : (
+            <div
+              style={{
+                width: levelStyle.iconSize,
+                height: levelStyle.iconSize,
+                backgroundColor: '#e0e0e0',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#999',
+                fontSize: 10,
+              }}
+            >
+              Icon
+            </div>
+          )}
+        </div>
 
-<img
-  src={getIconUrl(value)}
-  alt={value}
-  className="icon-dropdown-preview"
-/>
-        ) : (
+        <div
+          className="popup-text"
+          style={{
+            width: textAreaWidth,
+            textAlign: isVertical ? 'center' : 'left',
+          }}
+        >
+          {levelStyle.hasTitle && hasTitle && (
+            <div
+              ref={titleRef}
+              className="popup-title"
+              style={{
+                fontSize: BASE_SPECS.title.fontSize,
+                fontWeight: BASE_SPECS.title.fontWeight,
+                lineHeight: `${BASE_SPECS.title.lineHeight}px`,
+                color: levelStyle.textColor,
+              }}
+            >
+              {renderTextWithLineBreaks(title)}
+            </div>
+          )}
+
+          {hasDesc && (
+            <div
+              ref={descRef}
+              className="popup-description"
+              style={
+                isCritical
+                  ? {
+                      fontSize: criticalDescSpec.fontSize,
+                      fontWeight: criticalDescSpec.fontWeight,
+                      lineHeight:
+                        criticalDescSpec.lineHeight === 'auto'
+                          ? 'normal'
+                          : `${criticalDescSpec.lineHeight}px`,
+                      color: levelStyle.textColor,
+                      marginTop: 0,
+                    }
+                  : {
+                      fontSize: BASE_SPECS.description.fontSize,
+                      fontWeight: BASE_SPECS.description.fontWeight,
+                      lineHeight: `${BASE_SPECS.description.lineHeight}px`,
+                      color: levelStyle.textColor === '#000000' ? '#333333' : levelStyle.textColor,
+                      marginTop: hasTitle ? 4 : 0,
+                    }
+              }
+            >
+              {renderTextWithLineBreaks(description)}
+            </div>
+          )}
+        </div>
+
+        {/* Optional Image 영역 (horizontal 레이아웃에서만) */}
+        {!isVertical && includeImage && (
           <div
+            className="popup-image-area"
             style={{
-              width: levelStyle.iconSize,
-              height: levelStyle.iconSize,
-              backgroundColor: '#e0e0e0',
-              borderRadius: 8,
+              width: IMAGE_AREA_WIDTH,
+              backgroundColor: '#F7F7F7',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#999',
-              fontSize: 10,
+              color: '#aaa',
+              fontSize: 12,
+              flexShrink: 0,
+              marginLeft: 24,
+              marginTop: -levelStyle.padding.top,
+              marginBottom: -levelStyle.padding.bottom,
+              alignSelf: 'stretch',
+              borderTopRightRadius: cornerRadius,
+              borderBottomRightRadius: cornerRadius,
             }}
           >
-            Icon
+            image
           </div>
         )}
       </div>
 
-      <div
-        className="popup-text"
-        style={{
-          width: textAreaWidth,
-          textAlign: isVertical ? 'center' : 'left',
-        }}
-      >
-        {levelStyle.hasTitle && hasTitle && (
-          <div
-            ref={titleRef}
-            className="popup-title"
-            style={{
-              fontSize: BASE_SPECS.title.fontSize,
-              fontWeight: BASE_SPECS.title.fontWeight,
-              lineHeight: `${BASE_SPECS.title.lineHeight}px`,
-              color: levelStyle.textColor,
-            }}
-          >
-            {renderTextWithLineBreaks(title)}
-          </div>
-        )}
-
-        {hasDesc && (
-          <div
-            ref={descRef}
-            className="popup-description"
-            style={isCritical ? {
-              fontSize: criticalDescSpec.fontSize,
-              fontWeight: criticalDescSpec.fontWeight,
-              lineHeight: criticalDescSpec.lineHeight === 'auto' ? 'normal' : `${criticalDescSpec.lineHeight}px`,
-              color: levelStyle.textColor,
-              marginTop: 0,
-            } : {
-              fontSize: BASE_SPECS.description.fontSize,
-              fontWeight: BASE_SPECS.description.fontWeight,
-              lineHeight: `${BASE_SPECS.description.lineHeight}px`,
-              color: levelStyle.textColor === '#000000' ? '#333333' : levelStyle.textColor,
-              marginTop: hasTitle ? 4 : 0,
-            }}
-          >
-            {renderTextWithLineBreaks(description)}
-          </div>
-        )}
-      </div>
-
-      {/* Optional Image 영역 (horizontal 레이아웃에서만) */}
-      {!isVertical && includeImage && (
-        <div
-          className="popup-image-area"
-          style={{
-            width: IMAGE_AREA_WIDTH,
-            backgroundColor: '#F7F7F7',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#aaa',
-            fontSize: 12,
-            flexShrink: 0,
-            marginLeft: 24,
-            // 상하 패딩을 상쇄하여 팝업 끝까지 채움
-            marginTop: -levelStyle.padding.top,
-            marginBottom: -levelStyle.padding.bottom,
-            alignSelf: 'stretch',
-            // 오른쪽 끝 radius 적용 (Noto Sans는 32, 그 외 0)
-            borderTopRightRadius: cornerRadius,
-            borderBottomRightRadius: cornerRadius,
-          }}
-        >
-          image
-        </div>
-      )}
-      </div>
-      
       {/* 에러 정보 표시 (왼쪽 아래) */}
       {(isOverLimit || errorReasons.length > 0) && (
-        <div className="preview-error-info" style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          transform: `scale(${PREVIEW_SCALE})`,
-          transformOrigin: 'bottom left',
-          zIndex: 10,
-        }}>
+        <div
+          className="preview-error-info"
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            transform: `scale(${PREVIEW_SCALE})`,
+            transformOrigin: 'bottom left',
+            zIndex: 10,
+          }}
+        >
           {isOverLimit && (
             <div className="error-item">
               <span className="error-icon">⚠</span>
-              <span>문구 수 초과 ({totalLines} / {maxLines})</span>
+              <span>
+                문구 수 초과 ({totalLines} / {maxLines})
+              </span>
             </div>
           )}
           {errorReasons.map((reason, idx) => (
@@ -315,34 +344,28 @@ export default function PreviewPopup({
   onLineErrorChange,
   errorReasons = [],
 }) {
-  // 줄 수 초과 상태 추적 (상세 정보 포함)
   const [lineData, setLineData] = useState({});
-  
-  // 언어별 데이터 매핑
-  const getTextByLang = (langId) => ({
-    title: langId === 'ko' ? titleKo : titleEn,
-    description: langId === 'ko' ? descriptionKo : descriptionEn,
-  });
 
   // 표시할 언어 목록
-  const visibleLanguages = includeEnglish 
-    ? [LANGUAGES.ko, LANGUAGES.en] 
-    : [LANGUAGES.ko];
+  const visibleLanguages = includeEnglish ? [LANGUAGES.ko, LANGUAGES.en] : [LANGUAGES.ko];
 
   // 줄 수 정보 콜백
-  const handleLineCountChange = useCallback((fontId, langId, isOverLimit, totalLines, maxLines, titleLines, descLines) => {
-    setLineData(prev => {
-      const key = `${fontId}-${langId}`;
-      const newData = { isOverLimit, totalLines, maxLines, titleLines, descLines };
-      if (JSON.stringify(prev[key]) === JSON.stringify(newData)) return prev;
-      return { ...prev, [key]: newData };
-    });
-  }, []);
+  const handleLineCountChange = useCallback(
+    (fontId, langId, isOverLimit, totalLines, maxLines, titleLines, descLines) => {
+      setLineData((prev) => {
+        const key = `${fontId}-${langId}`;
+        const newData = { isOverLimit, totalLines, maxLines, titleLines, descLines };
+        if (JSON.stringify(prev[key]) === JSON.stringify(newData)) return prev;
+        return { ...prev, [key]: newData };
+      });
+    },
+    []
+  );
 
   // 전체 줄 수 에러 여부를 상위로 전달
   useEffect(() => {
     if (onLineErrorChange) {
-      const hasAnyError = Object.values(lineData).some(v => v?.isOverLimit === true);
+      const hasAnyError = Object.values(lineData).some((v) => v?.isOverLimit === true);
       onLineErrorChange(hasAnyError);
     }
   }, [lineData, onLineErrorChange]);
@@ -350,26 +373,27 @@ export default function PreviewPopup({
   // PNG 복사 함수
   const handleCopyPNG = async (cardElement) => {
     if (!cardElement) return;
-    
+
     try {
-      // 원본 크기로 캡처
       const canvas = await html2canvas(cardElement, {
         backgroundColor: null,
-        scale: 2, // 고해상도
+        scale: 2,
         useCORS: true,
         logging: false,
       });
 
-      // PNG로 변환하여 클립보드에 복사
       canvas.toBlob((blob) => {
         if (!blob) return;
         const item = new ClipboardItem({ 'image/png': blob });
-        navigator.clipboard.write([item]).then(() => {
-          alert('이미지가 클립보드에 복사되었습니다.');
-        }).catch((err) => {
-          console.error('복사 실패:', err);
-          alert('이미지 복사에 실패했습니다.');
-        });
+        navigator.clipboard
+          .write([item])
+          .then(() => {
+            alert('이미지가 클립보드에 복사되었습니다.');
+          })
+          .catch((err) => {
+            console.error('복사 실패:', err);
+            alert('이미지 복사에 실패했습니다.');
+          });
       }, 'image/png');
     } catch (error) {
       console.error('PNG 변환 실패:', error);
@@ -393,16 +417,27 @@ export default function PreviewPopup({
               <div className="preview-font-header-row preview-font-header-static">
                 <span className="font-name">{font.name}</span>
               </div>
-              
+
               {/* 프리뷰 카드 */}
               <div className="preview-lang-group preview-lang-responsive">
                 <div className="preview-card-wrapper">
                   {/* 이미지 복사 버튼 */}
-                  <div className="preview-lang-header" style={{ width: scaledWidth, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <div
+                    className="preview-lang-header"
+                    style={{
+                      width: scaledWidth,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
                     <button
                       className="preview-copy-png-btn"
                       onClick={async () => {
-                        const cardElement = document.querySelector(`[data-card-id="${font.id}"] .popup-card`);
+                        const cardElement = document.querySelector(
+                          `[data-card-id="${font.id}"] .popup-card`
+                        );
                         if (cardElement) {
                           await handleCopyPNG(cardElement);
                         }
@@ -412,7 +447,7 @@ export default function PreviewPopup({
                       이미지 복사
                     </button>
                   </div>
-                  
+
                   <div data-card-id={font.id}>
                     <PreviewCard
                       font={font}
