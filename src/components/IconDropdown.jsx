@@ -80,11 +80,13 @@ export default function IconDropdown({ value, onChange, disabled }) {
         {hasValue ? (
           <>
             <span className={`icon-dropdown-preview-wrapper ${isWhiteIcon(value) ? 'dark-bg' : ''}`}>
-              <img
-                src={`${import.meta.env.BASE_URL}icon_svg/${value}`}
-                alt={value}
-                className="icon-dropdown-preview"
-              />
+            import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
+
+            <img
+              src={getIconUrl(value)}
+              alt={value}
+              className="icon-dropdown-preview"
+            />
             </span>
             <span className="icon-dropdown-text">{formatIconName(value)}</span>
           </>
@@ -129,11 +131,13 @@ export default function IconDropdown({ value, onChange, disabled }) {
                   onClick={() => handleSelect(icon)}
                 >
                   <span className={`icon-dropdown-preview-wrapper ${isWhiteIcon(icon) ? 'dark-bg' : ''}`}>
-                    <img
-                      src={`${import.meta.env.BASE_URL}icon_svg/${value}`}
-                      alt={icon}
-                      className="icon-dropdown-preview"
-                    />
+import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
+
+<img
+  src={getIconUrl(value)}
+  alt={value}
+  className="icon-dropdown-preview"
+/>
                   </span>
                   <span className="icon-dropdown-text">{formatIconName(icon)}</span>
                 </li>
