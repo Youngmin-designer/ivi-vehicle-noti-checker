@@ -108,7 +108,7 @@ export default function IconComboBox({ value, onChange, disabled }) {
         {hasValue && isValidIcon(value) && (
           <span className={`icon-combobox-preview-wrapper ${isWhiteIcon(displayIcon) ? 'dark-bg' : ''}`}>
             <img
-              src={`/icon_svg/${displayIcon}`}
+              src={`${import.meta.env.BASE_URL}icon_svg/${displayIcon}`}
               alt={displayIcon}
               className="icon-combobox-preview"
             />
@@ -176,7 +176,7 @@ export default function IconComboBox({ value, onChange, disabled }) {
                 >
                   <span className={`icon-combobox-preview-wrapper ${isWhiteIcon(icon) ? 'dark-bg' : ''}`}>
                     <img
-                      src={`/icon_svg/${icon}`}
+                      src={`${import.meta.env.BASE_URL}icon_svg/${icon}`}
                       alt={icon}
                       className="icon-combobox-preview"
                     />
