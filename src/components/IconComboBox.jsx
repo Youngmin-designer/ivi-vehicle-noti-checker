@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ICON_LIST, WHITE_ICONS } from '../constants';
+import { getIconUrl } from '../utils/icon';
 
 export default function IconComboBox({ value, onChange, disabled }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +41,11 @@ export default function IconComboBox({ value, onChange, disabled }) {
   const filteredIcons = ICON_LIST.filter((icon) => {
     const iconName = icon.replace('.svg', '').toLowerCase();
     const iconNameNoUnderscore = iconName.replace(/_/g, '').replace(/-/g, '');
-    const query = searchQuery.toLowerCase().replace(/_/g, '').replace(/-/g, '').replace(/ /g, '');
+    const query = searchQuery
+      .toLowerCase()
+      .replace(/_/g, '')
+      .replace(/-/g, '')
+      .replace(/ /g, '');
     return iconName.includes(query) || iconNameNoUnderscore.includes(query);
   });
 
@@ -48,10 +53,11 @@ export default function IconComboBox({ value, onChange, disabled }) {
   const isValidIcon = (iconName) => {
     if (!iconName) return false;
     const normalized = iconName.toLowerCase().trim();
-    return ICON_LIST.some(icon => 
-      icon.toLowerCase() === normalized || 
-      icon.toLowerCase() === `${normalized}.svg` ||
-      icon.toLowerCase().replace('.svg', '') === normalized
+    return ICON_LIST.some(
+      (icon) =>
+        icon.toLowerCase() === normalized ||
+        icon.toLowerCase() === `${normalized}.svg` ||
+        icon.toLowerCase().replace('.svg', '') === normalized
     );
   };
 
@@ -59,10 +65,11 @@ export default function IconComboBox({ value, onChange, disabled }) {
   const normalizeIconName = (input) => {
     if (!input) return '';
     const normalized = input.toLowerCase().trim();
-    const found = ICON_LIST.find(icon => 
-      icon.toLowerCase() === normalized || 
-      icon.toLowerCase() === `${normalized}.svg` ||
-      icon.toLowerCase().replace('.svg', '') === normalized
+    const found = ICON_LIST.find(
+      (icon) =>
+        icon.toLowerCase() === normalized ||
+        icon.toLowerCase() === `${normalized}.svg` ||
+        icon.toLowerCase().replace('.svg', '') === normalized
     );
     return found || input; // 찾으면 정규화된 이름, 없으면 원본 반환
   };
@@ -74,10 +81,9 @@ export default function IconComboBox({ value, onChange, disabled }) {
 
   const handleToggle = () => {
     if (disabled) return;
-    setIsOpen(!isOpen);
-    if (isOpen) {
-      setSearchQuery('');
-    }
+    setIsOpen((prev) => !prev);
+    // 닫힐 때만 검색 초기화
+    if (isOpen) setSearchQuery('');
   };
 
   const handleSelect = (icon) => {
@@ -106,17 +112,20 @@ export default function IconComboBox({ value, onChange, disabled }) {
       <div className="icon-combobox-input-wrapper">
         {/* 아이콘 미리보기 */}
         {hasValue && isValidIcon(value) && (
-          <span className={`icon-combobox-preview-wrapper ${isWhiteIcon(displayIcon) ? 'dark-bg' : ''}`}>
-            import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
-
+          <span
+            className={`icon-combobox-preview-wrapper ${
+              isWhiteIcon(displayIcon) ? 'dark-bg' : ''
+            }`}
+          >
             <img
-              src={getIconUrl(value)}
-              alt={value}
-              className="icon-dropdown-preview"
+              src={getIconUrl(displayIcon)}
+              alt={displayIcon}
+              className="icon-combobox-preview"
+              loading="lazy"
             />
           </span>
         )}
-        
+
         {/* 텍스트 입력 필드 */}
         <input
           ref={inputRef}
@@ -130,7 +139,7 @@ export default function IconComboBox({ value, onChange, disabled }) {
           placeholder="아이콘 이름 입력 또는 선택"
           className="icon-combobox-input"
         />
-        
+
         {/* 드롭다운 토글 버튼 */}
         <button
           type="button"
@@ -176,22 +185,23 @@ export default function IconComboBox({ value, onChange, disabled }) {
                   className={`icon-combobox-item ${icon === displayIcon ? 'selected' : ''}`}
                   onClick={() => handleSelect(icon)}
                 >
-                  <span className={`icon-combobox-preview-wrapper ${isWhiteIcon(icon) ? 'dark-bg' : ''}`}>
-            import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
-
-            <img
-              src={getIconUrl(value)}
-              alt={value}
-              className="icon-dropdown-preview"
-            />
+                  <span
+                    className={`icon-combobox-preview-wrapper ${
+                      isWhiteIcon(icon) ? 'dark-bg' : ''
+                    }`}
+                  >
+                    <img
+                      src={getIconUrl(icon)}
+                      alt={icon}
+                      className="icon-combobox-preview"
+                      loading="lazy"
+                    />
                   </span>
                   <span className="icon-combobox-text">{formatIconName(icon)}</span>
                 </li>
               ))
             ) : (
-              <li className="icon-combobox-empty">
-                검색 결과가 없습니다
-              </li>
+              <li className="icon-combobox-empty">검색 결과가 없습니다</li>
             )}
           </ul>
         </div>
