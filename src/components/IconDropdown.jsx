@@ -81,7 +81,7 @@ export default function IconDropdown({ value, onChange, disabled }) {
           <>
             <span className={`icon-dropdown-preview-wrapper ${isWhiteIcon(value) ? 'dark-bg' : ''}`}>
               <img
-                src={`/icon_svg/${value}`}
+                src={`${import.meta.env.BASE_URL}icon_svg/${value}`}
                 alt={value}
                 className="icon-dropdown-preview"
               />
@@ -130,7 +130,7 @@ export default function IconDropdown({ value, onChange, disabled }) {
                 >
                   <span className={`icon-dropdown-preview-wrapper ${isWhiteIcon(icon) ? 'dark-bg' : ''}`}>
                     <img
-                      src={`/icon_svg/${icon}`}
+                      src={`${import.meta.env.BASE_URL}icon_svg/${value}`}
                       alt={icon}
                       className="icon-dropdown-preview"
                     />
