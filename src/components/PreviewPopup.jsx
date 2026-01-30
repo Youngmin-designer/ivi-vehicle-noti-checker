@@ -176,13 +176,13 @@ function PreviewCard({ font, language, selectedIcon, selectedLevel, title, descr
         }}
       >
         {selectedIcon ? (
-          <img
-            src={`/icon_svg/${selectedIcon}`}
-            alt="icon"
-            width={levelStyle.iconSize}
-            height={levelStyle.iconSize}
-            style={{ filter: iconFilter }}
-          />
+import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
+
+<img
+  src={getIconUrl(value)}
+  alt={value}
+  className="icon-dropdown-preview"
+/>
         ) : (
           <div
             style={{
