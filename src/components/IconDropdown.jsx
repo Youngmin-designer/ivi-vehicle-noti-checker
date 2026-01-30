@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ICON_LIST, WHITE_ICONS } from '../constants';
+import { getIconUrl } from '../utils/icon';
 
 export default function IconDropdown({ value, onChange, disabled }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,16 +40,19 @@ export default function IconDropdown({ value, onChange, disabled }) {
   const filteredIcons = ICON_LIST.filter((icon) => {
     const iconName = icon.replace('.svg', '').toLowerCase();
     const iconNameNoUnderscore = iconName.replace(/_/g, '').replace(/-/g, '');
-    const query = searchQuery.toLowerCase().replace(/_/g, '').replace(/-/g, '').replace(/ /g, '');
+    const query = searchQuery
+      .toLowerCase()
+      .replace(/_/g, '')
+      .replace(/-/g, '')
+      .replace(/ /g, '');
     return iconName.includes(query) || iconNameNoUnderscore.includes(query);
   });
 
   const handleToggle = () => {
     if (disabled) return;
-    setIsOpen(!isOpen);
-    if (isOpen) {
-      setSearchQuery('');
-    }
+    setIsOpen((prev) => !prev);
+    // 닫힐 때만 검색 초기화
+    if (isOpen) setSearchQuery('');
   };
 
   const handleSelect = (icon) => {
@@ -73,20 +77,25 @@ export default function IconDropdown({ value, onChange, disabled }) {
       {/* 선택된 아이콘 표시 (토글 버튼) */}
       <button
         type="button"
-        className={`icon-dropdown-toggle ${disabled ? 'disabled' : ''} ${!hasValue ? 'placeholder' : ''}`}
+        className={`icon-dropdown-toggle ${disabled ? 'disabled' : ''} ${
+          !hasValue ? 'placeholder' : ''
+        }`}
         onClick={handleToggle}
         disabled={disabled}
       >
         {hasValue ? (
           <>
-            <span className={`icon-dropdown-preview-wrapper ${isWhiteIcon(value) ? 'dark-bg' : ''}`}>
-            import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
-
-            <img
-              src={getIconUrl(value)}
-              alt={value}
-              className="icon-dropdown-preview"
-            />
+            <span
+              className={`icon-dropdown-preview-wrapper ${
+                isWhiteIcon(value) ? 'dark-bg' : ''
+              }`}
+            >
+              <img
+                src={getIconUrl(value)}
+                alt={value}
+                className="icon-dropdown-preview"
+                loading="lazy"
+              />
             </span>
             <span className="icon-dropdown-text">{formatIconName(value)}</span>
           </>
@@ -130,22 +139,23 @@ export default function IconDropdown({ value, onChange, disabled }) {
                   className={`icon-dropdown-item ${icon === value ? 'selected' : ''}`}
                   onClick={() => handleSelect(icon)}
                 >
-                  <span className={`icon-dropdown-preview-wrapper ${isWhiteIcon(icon) ? 'dark-bg' : ''}`}>
-import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
-
-<img
-  src={getIconUrl(value)}
-  alt={value}
-  className="icon-dropdown-preview"
-/>
+                  <span
+                    className={`icon-dropdown-preview-wrapper ${
+                      isWhiteIcon(icon) ? 'dark-bg' : ''
+                    }`}
+                  >
+                    <img
+                      src={getIconUrl(icon)}
+                      alt={icon}
+                      className="icon-dropdown-preview"
+                      loading="lazy"
+                    />
                   </span>
                   <span className="icon-dropdown-text">{formatIconName(icon)}</span>
                 </li>
               ))
             ) : (
-              <li className="icon-dropdown-empty">
-                검색 결과가 없습니다
-              </li>
+              <li className="icon-dropdown-empty">검색 결과가 없습니다</li>
             )}
           </ul>
         </div>
