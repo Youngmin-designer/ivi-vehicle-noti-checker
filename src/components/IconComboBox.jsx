@@ -107,10 +107,12 @@ export default function IconComboBox({ value, onChange, disabled }) {
         {/* 아이콘 미리보기 */}
         {hasValue && isValidIcon(value) && (
           <span className={`icon-combobox-preview-wrapper ${isWhiteIcon(displayIcon) ? 'dark-bg' : ''}`}>
+            import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
+
             <img
-              src={`${import.meta.env.BASE_URL}icon_svg/${displayIcon}`}
-              alt={displayIcon}
-              className="icon-combobox-preview"
+              src={getIconUrl(value)}
+              alt={value}
+              className="icon-dropdown-preview"
             />
           </span>
         )}
@@ -175,11 +177,13 @@ export default function IconComboBox({ value, onChange, disabled }) {
                   onClick={() => handleSelect(icon)}
                 >
                   <span className={`icon-combobox-preview-wrapper ${isWhiteIcon(icon) ? 'dark-bg' : ''}`}>
-                    <img
-                      src={`${import.meta.env.BASE_URL}icon_svg/${icon}`}
-                      alt={icon}
-                      className="icon-combobox-preview"
-                    />
+            import { getIconUrl } from '../utils/icon'; // 경로는 IconDropdown 위치에 맞게 조정
+
+            <img
+              src={getIconUrl(value)}
+              alt={value}
+              className="icon-dropdown-preview"
+            />
                   </span>
                   <span className="icon-combobox-text">{formatIconName(icon)}</span>
                 </li>
